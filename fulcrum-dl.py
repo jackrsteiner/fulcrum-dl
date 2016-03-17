@@ -5,9 +5,9 @@ import csv
 import sys
 
 # Set api acess token
-api_key = 'a33227d57eb22b27b7d930dea6754ea5f36523b1df1ac0cbc906ee37921ee232'
+api_key = read(open('api_key', 'r'))
 
-
+# Set api url
 url_base = 'https://api.fulcrumapp.com/api/v2/'
 append_token = '?token=' + api_key
 
