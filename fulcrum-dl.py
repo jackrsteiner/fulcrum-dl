@@ -5,7 +5,8 @@ import csv
 import sys
 
 # Set api acess token
-api_key = read(open('api_key', 'r'))
+api_key = open('api_key.txt', 'r').readline()
+print api_key
 
 # Set api url
 url_base = 'https://api.fulcrumapp.com/api/v2/'
@@ -13,6 +14,7 @@ append_token = '?token=' + api_key
 
 def loadRecord(record_id):
     record_url = url_base + 'records/' + record_id + '.json' + append_token
+    print record_url
     record_json_obj = urllib2.urlopen(record_url)
     print 'Loading record: ' + record_id
     return json.load(record_json_obj)
@@ -46,16 +48,22 @@ def dlRecordphotos(record_row):
     photo_key = detPhotoKey(form_values)
     fetchPhotos(form_values, photo_key, record_row)
 
+def safemkdir(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
 ids_tsv = open(sys.argv[1], 'rb') # Import csv from first argument
 
 try:
     reader = csv.reader(ids_tsv, dialect='excel', delimiter='\t')
     for record_row in reader:
         village = record_row[0]
+        print village
         iom_id = record_row[1]
+        print iom_id
         fulcrum_id = record_row[2]
-        if not os.path.exists(village):
-            os.makedirs(village)
+        print fulcrum_id
+        safemkdir(village)
         dlRecordphotos(record_row)
 finally:
     ids_tsv.close()
