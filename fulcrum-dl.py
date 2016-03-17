@@ -6,7 +6,6 @@ import sys
 
 # Set api acess token
 api_key = open('api_key.txt', 'r').readline()
-print api_key
 
 # Set api url
 url_base = 'https://api.fulcrumapp.com/api/v2/'
@@ -14,10 +13,11 @@ append_token = '?token=' + api_key
 
 def loadRecord(record_id):
     record_url = url_base + 'records/' + record_id + '.json' + append_token
-    print record_url
     record_json_obj = urllib2.urlopen(record_url)
     print 'Loading record: ' + record_id
-    return json.load(record_json_obj)
+    record_json = json.load(record_json_obj)
+    form_values = record_json['record']['form_values']
+    return form_values
 
 def dlPhoto(photo_url, local_path):
     print 'downloading: ' + local_path
@@ -32,38 +32,32 @@ def detPhotoKey(d):
     else:
         return 'a298'
 
-def fetchPhotos(form_values, photo_key, record_row):
+def fetchPhotos(form_values, photo_key, single_record):
     for photo in form_values[photo_key]:
         photo_filename = photo['photo_id'] + '.jpg'
         photo_url = url_base + 'photos/' + photo_filename + append_token
-        photo_directory = village + '/' + record_row[1][8:] + '/'
-        if not os.path.exists(photo_directory):
-            os.makedirs(photo_directory)
+        photo_directory = single_record[0] + '/' + single_record[1][8:] + '/'
+        safemkdir(photo_directory)
         photo_path = photo_directory + photo_filename
         dlPhoto(photo_url, photo_path)
 
-def dlRecordphotos(record_row):
-    record_data = loadRecord(record_row[2])
-    form_values = record_data['record']['form_values']
-    photo_key = detPhotoKey(form_values)
-    fetchPhotos(form_values, photo_key, record_row)
+def dlRecordphotos(single_record):
+    record_form_values = loadRecord(single_record[2])
+    photo_key = detPhotoKey(record_form_values)
+    fetchPhotos(record_form_values, photo_key, single_record)
 
 def safemkdir(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+# Open records list file
 ids_tsv = open(sys.argv[1], 'rb') # Import csv from first argument
 
+
 try:
-    reader = csv.reader(ids_tsv, dialect='excel', delimiter='\t')
-    for record_row in reader:
-        village = record_row[0]
-        print village
-        iom_id = record_row[1]
-        print iom_id
-        fulcrum_id = record_row[2]
-        print fulcrum_id
-        safemkdir(village)
-        dlRecordphotos(record_row)
+    record_list = csv.reader(ids_tsv, dialect='excel', delimiter='\t')
+    for single_record in record_list:
+        safemkdir(single_record[0])
+        dlRecordphotos(single_record)
 finally:
     ids_tsv.close()
