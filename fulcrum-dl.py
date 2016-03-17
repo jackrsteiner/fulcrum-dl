@@ -45,9 +45,9 @@ def fetchPhotos(form_values, photo_key, single_record):
             dlPhoto(photo_url, photo_path)
     else:
         print 'no photos for record ' + single_record[1][8:]
-        report = open("no_photo.txt", 'w')
-        report.write(single_record[1][8:] + "\n")
-        report.close()
+        #report = open("no_photo.txt", 'w')
+        #report.write(single_record[1][8:] + "\n")
+        #report.close()
 
 def dlRecordphotos(single_record):
     record_form_values = loadRecord(single_record[2])
